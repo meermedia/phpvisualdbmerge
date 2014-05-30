@@ -29,7 +29,7 @@
 
 <?php
 require('functions.php');
-connectDB();
+$db_global = connectDB();
 ?>
 
   <body>

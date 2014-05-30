@@ -28,6 +28,7 @@
   </head>
 
 <?php
+require('functions.php');
 connectDB();
 ?>
 

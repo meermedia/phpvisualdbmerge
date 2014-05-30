@@ -17,9 +17,6 @@
     <!-- Custom styles for this template -->
     <link href="css/dashboard.css" rel="stylesheet">
 
-    <!-- Just for debugging purposes. Don't actually copy this line! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
@@ -28,8 +25,9 @@
   </head>
 
 <?php
+require('config.php');
 require('functions.php');
-$db_global = connectDB();
+connectDB($db_left, $db_right);
 ?>
 
   <body>
@@ -43,18 +41,7 @@ $db_global = connectDB();
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Project name</a>
-        </div>
-        <div class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">Dashboard</a></li>
-            <li><a href="#">Settings</a></li>
-            <li><a href="#">Profile</a></li>
-            <li><a href="#">Help</a></li>
-          </ul>
-          <form class="navbar-form navbar-right">
-            <input type="text" class="form-control" placeholder="Search...">
-          </form>
+          <a class="navbar-brand" href="#">PHP Visual DB Merge</a>
         </div>
       </div>
     </div>
@@ -63,76 +50,107 @@ $db_global = connectDB();
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li class="active"><a href="#">Overview</a></li>
-            <li><a href="#">Reports</a></li>
-            <li><a href="#">Analytics</a></li>
-            <li><a href="#">Export</a></li>
-          </ul>
-          <ul class="nav nav-sidebar">
-            <li><a href="">Nav item</a></li>
-            <li><a href="">Nav item again</a></li>
-            <li><a href="">One more nav</a></li>
-            <li><a href="">Another nav item</a></li>
-            <li><a href="">More navigation</a></li>
-          </ul>
-          <ul class="nav nav-sidebar">
-            <li><a href="">Nav item again</a></li>
-            <li><a href="">One more nav</a></li>
-            <li><a href="">Another nav item</a></li>
+            <li class="active"><a href="#">DB Merge Tool</a></li>
           </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-          <h1 class="page-header">Dashboard</h1>
+          <h1 class="page-header">Merge Dashboard</h1>
 
-          <div class="row placeholders">
-            <div class="col-xs-6 col-sm-3 placeholder">
-              <img data-src="holder.js/200x200/auto/sky" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              <img data-src="holder.js/200x200/auto/vine" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              <img data-src="holder.js/200x200/auto/sky" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              <img data-src="holder.js/200x200/auto/vine" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-          </div>
-
-          <h2 class="sub-header">List databases</h2>
-          <div class="table-responsive">
-            <table class="table table-striped">
+          <div class="table-responsive"><form name="dbselect">
+            <table class="table table-condensed">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Header</th>
-                  <th>Header</th>
-                  <th>Header</th>
-                  <th>Header</th>
-                </tr>
-              </thead>
-              <tbody>
+                  <th>Left DB (#develop env) <select name="db_left" class="form-control input-sm">
 <?php
 	/* Select queries return a resultset */
-	if ($result = $mysqli->query("SHOW DATABASES")) {
-	    printf("Select returned %d rows.\n", $result->num_rows);
-	    echo "<tr><td>";
-	    print_r($result);
-	    echo "</td></tr>";
+	if ($result = $db_left->query("SHOW DATABASES")) {
+
+        /* fetch associative array */
+	    while ($row = $result->fetch_assoc()) {
+	    	$selected = (!empty($_REQUEST['db_left']) && $row["Database"] == $_REQUEST['db_left']) ? "selected" : "";
+	        printf ("<option %s>%s</option>\n", $selected, $row["Database"]);
+	    }
+
 	    /* free result set */
 	    $result->close();
 	}
 ?>
+					</select>
+                  </th>
+                  <th></th>
+                  <th>Right DB (#live env) <select name="db_right" class="form-control input-sm">
+<?php
+	/* Select queries return a resultset */
+	if ($result = $db_right->query("SHOW DATABASES")) {
+
+        /* fetch associative array */
+	    while ($row = $result->fetch_assoc()) {
+	    	$selected = (!empty($_REQUEST['db_right']) && $row["Database"] == $_REQUEST['db_right']) ? "selected" : "";
+	        printf ("<option %s>%s</option>\n", $selected, $row["Database"]);
+	    }
+
+	    /* free result set */
+	    $result->close();
+	}
+?>
+					</select>
+                  </th>
+                  <th><button type="submit" class="btn btn-primary">Load Tables</button></th>
+                </tr>
+              </thead>
+              <tbody>
+<?php
+	if (!empty($_REQUEST['db_left']) && !empty($_REQUEST['db_right'])) {
+		/* start with left db */
+		$db_left->select_db($_REQUEST['db_left']);
+		/* Select queries return a resultset */
+		if ($result = $db_left->query("SHOW TABLES")) {
+	        /* fetch array */
+		    while ($row = $result->fetch_row()) {
+		    	$tables_left[] = $row[0];
+		    }
+		    /* free result set */
+		    $result->close();
+		}
+		/* now do right db */
+		$db_right->select_db($_REQUEST['db_right']);
+		/* Select queries return a resultset */
+		if ($result = $db_right->query("SHOW TABLES")) {
+	        /* fetch array */
+		    while ($row = $result->fetch_row()) {
+		    	$tables_right[] = $row[0];
+		    }
+		    /* free result set */
+		    $result->close();
+		}
+	}
+	/* merge left and right array */
+	$tables_merged = array_merge($tables_left, $tables_right);
+	sort($tables_merged);
+	$tables_merged = array_unique($tables_merged);
+    /* display merged array */
+    foreach ($tables_merged as $table) {
+    	echo "<tr>";
+        if (in_array($table, $tables_left)) printf ("<td>%s</td>\n", $table);
+    	else { echo "<td></td>"; }
+    	$left = (in_array($table, $tables_left) && !in_array($table, $tables_right)) ? "active" : "";
+    	$right = (!in_array($table, $tables_left) && in_array($table, $tables_right)) ? "active" : "";
+    	printf ("<td><div class='btn-group btn-group-xs' data-toggle='buttons'>
+    		<label class='btn btn-primary %s'><input type='radio' name='%s' id='left'><span class='glyphicon glyphicon-chevron-left'></span></label>
+    		<label class='btn btn-primary'><input type='radio' name='%s' id='fuseleft'><span class='glyphicon glyphicon-circle-arrow-left'><span class='glyphicon glyphicon-transfer'></span></label>
+    		<label class='btn btn-primary'><input type='radio' name='%s' id='fuseright'><span class='glyphicon glyphicon-transfer'><span class='glyphicon glyphicon-circle-arrow-right'></span></label>
+    		<label class='btn btn-primary %s'><input type='radio' name='%s' id='right'><span class='glyphicon glyphicon-chevron-right'></span></label>
+    		</div></td>\n"
+    		, $left, $table, $table, $table, $right, $table);
+        if (in_array($table, $tables_right)) printf ("<td>%s</td>\n", $table);
+    	else { echo "<td></td>"; }
+    	echo "<td></td>";
+    	echo "<tr>";
+    }
+?>
               </tbody>
             </table>
+            </form>
           </div>
         </div>
       </div>

@@ -94,3 +94,19 @@ body {
   display: inline-block;
   border-radius: 50%;
 }
+
+/*
+ * Placeholder dashboard ideas
+ */
+
+.btn-primary {
+  color: #fff;
+  background-color: #B3D3EE;
+  border-color: #A8C0D5;
+}
+
+.btn-primary.active {
+  color: #fff;
+  background-color: #5FE46A;
+  border-color: #50C554;
+}

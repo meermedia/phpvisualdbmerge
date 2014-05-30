@@ -1,15 +1,19 @@
 <?php
 
-function connectDB() {
-	require('config.php');
+function connectDB($db_left, $db_right) {
 
 	/* check connection */
-	if ($mysqli->connect_errno) {
-	    printf("Connect failed: %s\n", $mysqli->connect_error);
+	if ($db_left->connect_errno) {
+	    printf("Connect left DB failed: %s\n", $db_left->connect_error);
 	    exit();
 	}
 
-	return $mysqli;
+	/* check connection */
+	if ($db_right->connect_errno) {
+	    printf("Connect right DB failed: %s\n", $db_right->connect_error);
+	    exit();
+	}
+
 }
 
 function voidFunc() {
@@ -40,5 +44,7 @@ function voidFunc() {
 }
 
 function closeDB() {
-	$mysqli->close();
+	if (isset($db_global)) $db_global->close();
+	if (isset($db_left)) $db_left->close();
+	if (isset($db_rigt)) $db_right->close();
 }

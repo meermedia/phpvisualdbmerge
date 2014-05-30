@@ -1,0 +1,12 @@
+# Ignore configuration files
+config.php
+
+# Ignore paths with saved settings
+profiles/*
+
+# Ignore IDE directories
+nbproject
+.idea
+
+# Apple stuff
+.DS_Store

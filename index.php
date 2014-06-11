@@ -28,6 +28,10 @@
 require('config.php');
 require('functions.php');
 connectDB($db_left, $db_right);
+
+$preset = (!empty($_REQUEST['preset'])) ? $_REQUEST['preset'] : '';
+$diff = (!empty($_REQUEST['diff'])) ? $_REQUEST['diff'] : '';
+
 ?>
 
   <body>
@@ -77,7 +81,15 @@ connectDB($db_left, $db_right);
 ?>
 					</select>
                   </th>
-                  <th></th>
+                  <th>
+                    <label class="checkbox" for="checkboxes-0"><input type="checkbox" name="diff" id="checkboxes-0" value="1" <?php if (!empty($diff)) echo "checked"; ?>>Auto select unique</label>
+                    <select name="preset" class="form-control input-sm">
+                    <option value="">--- use preset? ---</option>
+                    <option value="drupal-auto" <?php if ($preset == 'drupal-auto') echo "selected"; ?>>drupal-auto</option>
+                    <option value="drupal-6" <?php if ($preset == 'drupal-6') echo "selected"; ?>>drupal-6</option>
+                    <option value="drupal-7" <?php if ($preset == 'drupal-7') echo "selected"; ?>>drupal-7</option>
+                    </select>
+                    </th>
                   <th>Right DB (#live env) <select name="db_right" class="form-control input-sm">
 <?php
 	/* Select queries return a resultset */
@@ -100,53 +112,124 @@ connectDB($db_left, $db_right);
               </thead>
               <tbody>
 <?php
+  function searchKey($needle, $tables)
+  {
+    foreach($tables as $key => $table)
+    {
+      if ( $table['table'] === $needle )
+        return $key;
+    }
+    return false;
+  }
+
+  function array_key_exists_wildcard($key,$array)
+  {
+    foreach ($array as $matchto)
+    {
+      if (preg_match("/^".$matchto."$/", $key)) {
+        return true;
+      }
+    }
+  }
+
+  function presetTables($tables_merged, $tables_left, $tables_right, $preset, $diff)
+  {
+    require('presets.php');
+    switch ($preset) {
+      case 'drupal-auto':
+        break;
+      case 'drupal-6':
+        foreach ($tables_merged as $table) {
+          if (array_key_exists_wildcard($table,$drupal6content))
+          {
+            $tables[$table]['preset'] = 'right';
+          }
+          else
+          {
+            $tables[$table]['preset'] = 'left';
+          }
+        }
+        break;
+      case 'drupal-7':
+        break;
+    }
+    return $tables;
+  }
+
 	if (!empty($_REQUEST['db_left']) && !empty($_REQUEST['db_right'])) {
 		/* start with left db */
 		$db_left->select_db($_REQUEST['db_left']);
 		/* Select queries return a resultset */
-		if ($result = $db_left->query("SHOW TABLES")) {
-	        /* fetch array */
-		    while ($row = $result->fetch_row()) {
-		    	$tables_left[] = $row[0];
+    $stmt = $db_left->prepare("SELECT TABLE_NAME,GROUP_CONCAT(COLUMN_NAME ORDER BY COLUMN_NAME SEPARATOR ',') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA LIKE ? GROUP BY TABLE_NAME ORDER BY TABLE_NAME, COLUMN_NAME");
+    $stmt->bind_param('s', $_REQUEST['db_left']);
+    $stmt->execute();
+    if ($result = $stmt->bind_result($col1,$col2)) {
+        /* fetch array */
+		    while ($stmt->fetch()) {
+		    	$tables_left_collection[] = array( 
+		    		'table' => $col1,
+		    		'fields' => $col2,
+		    		);
+        $tables_left[$col1] = $col2;
 		    }
 		    /* free result set */
-		    $result->close();
+		    $stmt->close();
 		}
 		/* now do right db */
 		$db_right->select_db($_REQUEST['db_right']);
 		/* Select queries return a resultset */
-		if ($result = $db_right->query("SHOW TABLES")) {
-	        /* fetch array */
-		    while ($row = $result->fetch_row()) {
-		    	$tables_right[] = $row[0];
-		    }
-		    /* free result set */
-		    $result->close();
-		}
-	}
-	/* merge left and right array */
-	$tables_merged = array_merge($tables_left, $tables_right);
-	sort($tables_merged);
-	$tables_merged = array_unique($tables_merged);
+    $stmt = $db_left->prepare("SELECT TABLE_NAME,GROUP_CONCAT(COLUMN_NAME ORDER BY COLUMN_NAME SEPARATOR ',') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA LIKE ? GROUP BY TABLE_NAME ORDER BY TABLE_NAME, COLUMN_NAME");
+    $stmt->bind_param('s', $_REQUEST['db_right']);
+    $stmt->execute();
+    if ($result = $stmt->bind_result($col1,$col2)) {
+        /* fetch array */
+        while ($stmt->fetch()) {
+          $tables_right_collection[] = array( 
+            'table' => $col1,
+            'fields' => $col2,
+            );
+        $tables_right[$col1] = $col2;
+        }
+        /* free result set */
+        $stmt->close();
+    }
+    /* merge left and right array */
+    //$tables_merged = array_merge($tables_left, $tables_right);
+    $tables_merged = $tables_left + $tables_right;
+    //sort($tables_merged);
+    ksort($tables_merged);
+    $tables_merged = array_unique(array_keys($tables_merged));
+    $tables_presets = presetTables($tables_merged, $tables_left, $tables_right, $preset, $diff);
     /* display merged array */
     foreach ($tables_merged as $table) {
-    	echo "<tr>";
-        if (in_array($table, $tables_left)) printf ("<td>%s</td>\n", $table);
-    	else { echo "<td></td>"; }
-    	$left = (in_array($table, $tables_left) && !in_array($table, $tables_right)) ? "active" : "";
-    	$right = (!in_array($table, $tables_left) && in_array($table, $tables_right)) ? "active" : "";
-    	printf ("<td><div class='btn-group btn-group-xs' data-toggle='buttons'>
-    		<label class='btn btn-primary %s'><input type='radio' name='%s' id='left'><span class='glyphicon glyphicon-chevron-left'></span></label>
-    		<label class='btn btn-primary'><input type='radio' name='%s' id='fuseleft'><span class='glyphicon glyphicon-circle-arrow-left'><span class='glyphicon glyphicon-transfer'></span></label>
-    		<label class='btn btn-primary'><input type='radio' name='%s' id='fuseright'><span class='glyphicon glyphicon-transfer'><span class='glyphicon glyphicon-circle-arrow-right'></span></label>
-    		<label class='btn btn-primary %s'><input type='radio' name='%s' id='right'><span class='glyphicon glyphicon-chevron-right'></span></label>
-    		</div></td>\n"
-    		, $left, $table, $table, $table, $right, $table);
-        if (in_array($table, $tables_right)) printf ("<td>%s</td>\n", $table);
-    	else { echo "<td></td>"; }
-    	echo "<td></td>";
-    	echo "<tr>";
+      echo "<tr>";
+      if (array_key_exists($table, $tables_left)) printf ("<td>%s</td>\n", $table);
+      else { echo "<td></td>"; }
+      $left = (array_key_exists($table, $tables_presets) && $tables_presets[$table]['preset'] == 'left') ? "active" : "";
+      $right = (array_key_exists($table, $tables_presets) && $tables_presets[$table]['preset'] == 'right') ? "active" : "";
+      if ((array_key_exists($table, $tables_left)) && (array_key_exists($table, $tables_right)) && ($tables_left[$table] != $tables_right[$table]))
+      {
+        $only_left = implode(',',array_diff(explode(',',$tables_left[$table]),explode(',',$tables_right[$table])));
+        $only_right = implode(',',array_diff(explode(',',$tables_right[$table]),explode(',',$tables_left[$table])));
+        echo '<td><div id="myDiv"><a id="pop" href-"#" class="btn btn-sm btn-danger" data-toggle="popover" data-content="Only left:<br />' . $only_left . '<br />Only right:<br />' . $only_right . '<br /><br />left:<br />'. $tables_left[$table] . '<br />right:<br />' . $tables_right[$table].'">column mismatch</a></div></td>';
+      }
+      else
+      {
+      printf ("<td><div class='btn-group btn-group-xs' data-toggle='buttons'>
+        <label class='btn btn-primary %s'><input type='radio' name='%s' id='left'><span class='glyphicon glyphicon-chevron-right'></span></label>
+        <label class='btn btn-primary'><input type='radio' name='%s' id='fuseleft'><span class='glyphicon glyphicon-circle-arrow-right'><span class='glyphicon glyphicon-transfer'></span></label>
+        <label class='btn btn-primary'><input type='radio' name='%s' id='skip'><span class='glyphicon glyphicon-remove'></span></label>
+        <label class='btn btn-primary'><input type='radio' name='%s' id='fuseright'><span class='glyphicon glyphicon-transfer'><span class='glyphicon glyphicon-circle-arrow-left'></span></label>
+        <label class='btn btn-primary %s'><input type='radio' name='%s' id='right'><span class='glyphicon glyphicon-chevron-left'></span></label>
+        </div></td>\n"
+        , $left, $table, $table, $table, $table, $right, $table);
+      }
+      if (array_key_exists($table, $tables_right)) printf ("<td>%s</td>\n", $table);
+      else { echo "<td></td>"; }
+      echo "<td></td>";
+      echo "<tr>";
     }
+	}
 ?>
               </tbody>
             </table>
@@ -162,6 +245,11 @@ connectDB($db_left, $db_right);
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/docs.min.js"></script>
+    <script type="text/javascript">
+
+      $('[data-toggle="popover"]').popover({trigger: 'hover','placement': 'bottom',html: true});
+
+    </script>
   </body>
 </html>
 <?php

@@ -110,3 +110,12 @@ body {
   background-color: #5FE46A;
   border-color: #50C554;
 }
+
+/*
+ * Tooltip
+ */
+.popover {
+    min-width: 200px;
+    max-width: 100%;
+    font-size: 11px;
+}

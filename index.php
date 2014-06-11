@@ -178,7 +178,7 @@ $diff = (!empty($_REQUEST['diff'])) ? $_REQUEST['diff'] : '';
 		/* now do right db */
 		$db_right->select_db($_REQUEST['db_right']);
 		/* Select queries return a resultset */
-    $stmt = $db_left->prepare("SELECT TABLE_NAME,GROUP_CONCAT(COLUMN_NAME ORDER BY COLUMN_NAME SEPARATOR ',') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA LIKE ? GROUP BY TABLE_NAME ORDER BY TABLE_NAME, COLUMN_NAME");
+    $stmt = $db_right->prepare("SELECT TABLE_NAME,GROUP_CONCAT(COLUMN_NAME ORDER BY COLUMN_NAME SEPARATOR ',') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA LIKE ? GROUP BY TABLE_NAME ORDER BY TABLE_NAME, COLUMN_NAME");
     $stmt->bind_param('s', $_REQUEST['db_right']);
     $stmt->execute();
     if ($result = $stmt->bind_result($col1,$col2)) {

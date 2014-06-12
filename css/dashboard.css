@@ -111,11 +111,26 @@ body {
   border-color: #50C554;
 }
 
+.btn-primary.active.remove {
+  background-color: #E45F8A;
+  border-color: #C5507A; 
+}
+
+.btn-primary.active.trash {
+  background-color: #E4D45F;
+  border-color: #C5C050;
+}
+
 /*
- * Tooltip
+ * Tooltip and popover
  */
 .popover {
     min-width: 200px;
-    max-width: 100%;
+    max-width: 1000px;
+    font-size: 11px;
+}
+
+.tooltip {
+    min-width: 100px;
     font-size: 11px;
 }

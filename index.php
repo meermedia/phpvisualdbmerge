@@ -31,6 +31,7 @@ connectDB($db_left, $db_right);
 
 $preset = (!empty($_REQUEST['preset'])) ? $_REQUEST['preset'] : '';
 $diff = (!empty($_REQUEST['diff'])) ? $_REQUEST['diff'] : '';
+$emptycache = (!empty($_REQUEST['emptycache'])) ? $_REQUEST['emptycache'] : '';
 
 ?>
 
@@ -64,6 +65,7 @@ $diff = (!empty($_REQUEST['diff'])) ? $_REQUEST['diff'] : '';
             <table class="table table-condensed">
               <thead>
                 <tr>
+                  <th></th>
                   <th>Left DB (#develop env) <select name="db_left" class="form-control input-sm">
 <?php
 	/* Select queries return a resultset */
@@ -82,7 +84,8 @@ $diff = (!empty($_REQUEST['diff'])) ? $_REQUEST['diff'] : '';
 					</select>
                   </th>
                   <th>
-                    <label class="checkbox" for="checkboxes-0"><input type="checkbox" name="diff" id="checkboxes-0" value="1" <?php if (!empty($diff)) echo "checked"; ?>>Auto select unique</label>
+                    <label class="checkbox" for="checkboxes-0"><input type="checkbox" name="emptycache" id="checkboxes-0" value="1" <?php if (!empty($emptycache)) echo "checked"; ?>>Empty cache tables</label>
+                    <label class="checkbox" for="checkboxes-1"><input type="checkbox" name="diff" id="checkboxes-1" value="1" <?php if (!empty($diff)) echo "checked"; ?>>Auto select unique</label>
                     <select name="preset" class="form-control input-sm">
                     <option value="">--- use preset? ---</option>
                     <option value="drupal-auto" <?php if ($preset == 'drupal-auto') echo "selected"; ?>>drupal-auto</option>
@@ -132,11 +135,21 @@ $diff = (!empty($_REQUEST['diff'])) ? $_REQUEST['diff'] : '';
     }
   }
 
-  function presetTables($tables_merged, $tables_left, $tables_right, $preset, $diff)
+  function presetTables($tables_merged, $tables_left, $tables_right, $preset, $diff, $emptycache)
   {
     require('presets.php');
     switch ($preset) {
       case 'drupal-auto':
+        foreach ($tables_merged as $table) {
+          if ( array_key_exists($table, $tables_left) && ( $drupalauto != array_diff( $drupalauto, explode(',',$tables_left[$table]) ) ) )
+          {
+            $tables[$table]['preset'] = 'right';
+          }
+          else
+          {
+            $tables[$table]['preset'] = 'left';
+          }
+        }
         break;
       case 'drupal-6':
         foreach ($tables_merged as $table) {
@@ -151,7 +164,43 @@ $diff = (!empty($_REQUEST['diff'])) ? $_REQUEST['diff'] : '';
         }
         break;
       case 'drupal-7':
+        foreach ($tables_merged as $table) {
+          if (array_key_exists_wildcard($table,$drupal7content))
+          {
+            $tables[$table]['preset'] = 'right';
+          }
+          else
+          {
+            $tables[$table]['preset'] = 'left';
+          }
+        }
         break;
+    }
+    /*
+     * Check for tables that only exist in one database and select them
+     */
+    if ($diff) {
+      foreach ($tables_merged as $table) {
+            if ( !array_key_exists($table, $tables_left) )
+            {
+              $tables[$table]['preset'] = 'right';
+            }
+            elseif ( !array_key_exists($table, $tables_right) )
+            {
+              $tables[$table]['preset'] = 'left';
+            }
+      }
+    }
+    /*
+     * Use empty cache tables if selected
+     */
+    if ($emptycache) {
+      foreach ($tables_merged as $table) {
+            if ( array_key_exists_wildcard($table,$drupalcache) )
+            {
+              $tables[$table]['preset'] = 'empty';
+            }
+      }
     }
     return $tables;
   }
@@ -199,31 +248,31 @@ $diff = (!empty($_REQUEST['diff'])) ? $_REQUEST['diff'] : '';
     //sort($tables_merged);
     ksort($tables_merged);
     $tables_merged = array_unique(array_keys($tables_merged));
-    $tables_presets = presetTables($tables_merged, $tables_left, $tables_right, $preset, $diff);
+    $tables_presets = presetTables($tables_merged, $tables_left, $tables_right, $preset, $diff, $emptycache);
     /* display merged array */
     foreach ($tables_merged as $table) {
-      echo "<tr>";
-      if (array_key_exists($table, $tables_left)) printf ("<td>%s</td>\n", $table);
-      else { echo "<td></td>"; }
       $left = (array_key_exists($table, $tables_presets) && $tables_presets[$table]['preset'] == 'left') ? "active" : "";
       $right = (array_key_exists($table, $tables_presets) && $tables_presets[$table]['preset'] == 'right') ? "active" : "";
+      $empty = (array_key_exists($table, $tables_presets) && $tables_presets[$table]['preset'] == 'empty') ? "active" : "";
+      echo "<tr>";
       if ((array_key_exists($table, $tables_left)) && (array_key_exists($table, $tables_right)) && ($tables_left[$table] != $tables_right[$table]))
       {
         $only_left = implode(',',array_diff(explode(',',$tables_left[$table]),explode(',',$tables_right[$table])));
         $only_right = implode(',',array_diff(explode(',',$tables_right[$table]),explode(',',$tables_left[$table])));
-        echo '<td><div id="myDiv"><a id="pop" href-"#" class="btn btn-sm btn-danger" data-toggle="popover" data-content="Only left:<br />' . $only_left . '<br />Only right:<br />' . $only_right . '<br /><br />left:<br />'. $tables_left[$table] . '<br />right:<br />' . $tables_right[$table].'">column mismatch</a></div></td>';
+        echo '<td><div id="myDiv" class="btn-group btn-group-xs"><a id="pop" href-"#" class="btn btn-sm btn-danger" data-toggle="popover" data-content="Column Mismatch<br /><br />Only left:<br />' . $only_left . '<br />Only right:<br />' . $only_right . '<br /><br />left:<br />'. $tables_left[$table] . '<br />right:<br />' . $tables_right[$table].'"><span class="glyphicon glyphicon-fire"></span></a></div></td>';
       }
-      else
-      {
-      printf ("<td><div class='btn-group btn-group-xs' data-toggle='buttons'>
-        <label class='btn btn-primary %s'><input type='radio' name='%s' id='left'><span class='glyphicon glyphicon-chevron-right'></span></label>
-        <label class='btn btn-primary'><input type='radio' name='%s' id='fuseleft'><span class='glyphicon glyphicon-circle-arrow-right'><span class='glyphicon glyphicon-transfer'></span></label>
-        <label class='btn btn-primary'><input type='radio' name='%s' id='skip'><span class='glyphicon glyphicon-remove'></span></label>
-        <label class='btn btn-primary'><input type='radio' name='%s' id='fuseright'><span class='glyphicon glyphicon-transfer'><span class='glyphicon glyphicon-circle-arrow-left'></span></label>
-        <label class='btn btn-primary %s'><input type='radio' name='%s' id='right'><span class='glyphicon glyphicon-chevron-left'></span></label>
+      else { echo "<td></td>"; }
+      if (array_key_exists($table, $tables_left)) printf ("<td>%s</td>\n", $table);
+      else { echo "<td></td>"; }
+      printf ("<td><div id='action' class='btn-group btn-group-xs' data-toggle='buttons'>
+        <label class='btn btn-primary %s' data-toggle='popover' data-content='use left table for export'><input type='radio' name='%s' id='left'><span class='glyphicon glyphicon-chevron-right'></span></label>
+        <label class='btn btn-primary' data-toggle='popover' data-content='merge tables with left table as leading'><input type='radio' name='%s' id='fuseleft'><span class='glyphicon glyphicon-circle-arrow-right'><span class='glyphicon glyphicon-transfer'></span></label>
+        <label class='btn btn-primary remove' data-toggle='popover' data-content='exclude table from export'><input type='radio' name='%s' id='skip'><span class='glyphicon glyphicon-remove'></span></label>
+        <label class='btn btn-primary trash %s' data-toggle='popover' data-content='use empty table for export'><input type='radio' name='%s' id='skip'><span class='glyphicon glyphicon-trash'></span></label>
+        <label class='btn btn-primary' data-toggle='popover' data-content='merge tables with right table as leading'><input type='radio' name='%s' id='fuseright'><span class='glyphicon glyphicon-transfer'><span class='glyphicon glyphicon-circle-arrow-left'></span></label>
+        <label class='btn btn-primary %s' data-toggle='popover' data-content='use right table for export'><input type='radio' name='%s' id='right'><span class='glyphicon glyphicon-chevron-left'></span></label>
         </div></td>\n"
-        , $left, $table, $table, $table, $table, $right, $table);
-      }
+        , $left, $table, $table, $table, $empty, $table, $table, $right, $table);
       if (array_key_exists($table, $tables_right)) printf ("<td>%s</td>\n", $table);
       else { echo "<td></td>"; }
       echo "<td></td>";
@@ -248,6 +297,7 @@ $diff = (!empty($_REQUEST['diff'])) ? $_REQUEST['diff'] : '';
     <script type="text/javascript">
 
       $('[data-toggle="popover"]').popover({trigger: 'hover','placement': 'bottom',html: true});
+      $('[data-toggle="tooltip"]').tooltip({container: 'body'});
 
     </script>
   </body>

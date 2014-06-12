@@ -1,4 +1,26 @@
 <?php
+/*
+ * Use regex to implement wildcards in fieldnames
+ */
+
+$drupalauto = array(
+	'uid',
+	'nid',
+	'eid',
+	'gid',
+	'vid',
+	'tid',
+	'env_id',
+	'fid',
+	'rid',
+	'sid',
+	);
+
+$drupalcache = array(
+	'cache',
+	'cache_(.*)',
+	);
+
 $drupal6content = array(
 	'accesslog',
 	'apachesolr_(.*)',
@@ -40,4 +62,21 @@ $drupal6content = array(
 	'uuid_(.*)',
 	'vocabulary(.*)',
 	'watchdog',
+);
+$drupal7content = array(
+	'field_data(.*)',
+	'field_revision(.*)',
+	'file(.*)',
+	'node',
+	'node_access',
+	'node_comment_statistics',
+	'node_revision',
+	'og_membership',
+	'og_users_roles',
+	'sessions',
+	'taxonomy(.*)',
+	'users',
+	'users_roles',
+	'webform_submissions',
+	'webform_submitted_data',
 );

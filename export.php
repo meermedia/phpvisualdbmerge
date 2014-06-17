@@ -65,7 +65,7 @@ foreach ($input as $pairs)
 
 			$dump->dropTable = true; // Dump DROP TABLE statement, default: true
 			$dump->createTable = true; // Dump CREATE TABLE statement, default: true
-			$dump->expInsert = true; // Dump expanded INSERT statements, default: false
+			$dump->expInsert = false; // Dump expanded INSERT statements, default: false
 			$dump->hexValue = true; // Dump strings as hex values, default: false
 			$dump->phpMyAdmin = true; // Formats dump file like phpMyAdmin export, default: true
 			$dump->utf8 = true; // Uses UTF-8 connection with MySQL server, default: true

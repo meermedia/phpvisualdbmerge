@@ -226,7 +226,6 @@ $emptycache = (!empty($_REQUEST['emptycache'])) ? $_REQUEST['emptycache'] : '';
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/docs.min.js"></script>
     <script type="text/javascript">
 
       $('[data-toggle="popover"]').popover({trigger: 'hover','placement': 'bottom',html: true});

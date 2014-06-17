@@ -4,6 +4,9 @@ config.php
 # Ignore paths with saved settings
 profiles/*
 
+# Ignore backup files
+backup/*.sql*
+
 # Ignore IDE directories
 nbproject
 .idea

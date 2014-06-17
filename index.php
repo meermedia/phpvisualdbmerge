@@ -77,19 +77,6 @@ $emptycache = (!empty($_REQUEST['emptycache'])) ? $_REQUEST['emptycache'] : '';
           <button type="submit" class="btn btn-primary">Load Tables</button><br />
           <br />
           <button type="button" class="btn btn-primary" id="export" data-toggle="modal" data-target="#myModal">Export</button><br />
-          <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                  <h4 class="modal-title" id="myModalLabel">Exporting...</h4>
-                </div>
-                <div class="modal-body">
-                  Exporting merged databases, please wait.
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <h1 class="page-header">Merge Dashboard</h1>
@@ -219,6 +206,19 @@ $emptycache = (!empty($_REQUEST['emptycache'])) ? $_REQUEST['emptycache'] : '';
         </div>
       </div>
       </form>
+    </div>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="myModalLabel">Exporting</h4>
+          </div>
+          <div class="modal-body">
+            <span class='glyphicon glyphicon-floppy-save'></span> Exporting merged databases, please wait...
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Bootstrap core JavaScript

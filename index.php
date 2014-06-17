@@ -180,10 +180,13 @@ $emptycache = (!empty($_REQUEST['emptycache'])) ? $_REQUEST['emptycache'] : '';
       {
         $only_left = implode(',',array_diff(explode(',',$tables_left[$table]),explode(',',$tables_right[$table])));
         $only_right = implode(',',array_diff(explode(',',$tables_right[$table]),explode(',',$tables_left[$table])));
-        echo '<td><div id="myDiv" class="btn-group btn-group-xs"><a id="pop" href-"#" class="btn btn-sm btn-danger" data-toggle="popover" data-content="Column Mismatch<br /><br />Only left:<br />' . $only_left . '<br />Only right:<br />' . $only_right . '<br /><br />left:<br />'. $tables_left[$table] . '<br />right:<br />' . $tables_right[$table].'"><span class="glyphicon glyphicon-fire"></span></a></div></td>';
+        echo '<td><div id="myDiv" class="btn-group btn-group-xs"><a id="pop" href-"#" class="btn btn-sm btn-danger" data-toggle="popover" data-content="Column Mismatch<br /><br /><strong>Only left:</strong><br />' . $only_left . '<br /><br /><strong>Only right:</strong><br />' . $only_right . '"><span class="glyphicon glyphicon-fire"></span></a></div></td>';
       }
-      else { echo "<td></td>"; }
-      if (array_key_exists($table, $tables_left)) printf ("<td>%s</td>\n", $table);
+      else 
+      { 
+        echo '<td></td>';
+      }
+      if (array_key_exists($table, $tables_left)) printf ("<td><div id='myDiv' class='btn-group btn-group-xs'><a id='pop' href-'#'' class='btn btn-sm' data-toggle='popover' data-content='Columns<br /><br />%s'><span class='glyphicon glyphicon-collapse-down'></span></a></div>%s</td>\n",  $tables_left[$table], $table);
       else { echo "<td></td>"; }
         //<label class='btn btn-primary' data-toggle='popover' data-content='merge tables with left table as leading'><input type='radio' name='%s' id='fuseleft' value='fuseleft'><span class='glyphicon glyphicon-circle-arrow-right'><span class='glyphicon glyphicon-transfer'></span></label>
         //<label class='btn btn-primary' data-toggle='popover' data-content='merge tables with right table as leading'><input type='radio' name='%s' id='fuseright' value='fuseright'><span class='glyphicon glyphicon-transfer'><span class='glyphicon glyphicon-circle-arrow-left'></span></label>
@@ -194,7 +197,7 @@ $emptycache = (!empty($_REQUEST['emptycache'])) ? $_REQUEST['emptycache'] : '';
         <label class='btn btn-primary %s' data-toggle='popover' data-content='use right table for export'><input type='radio' name='%s' id='right' value='right'><span class='glyphicon glyphicon-chevron-left'></span></label>
         </div></td>\n"
         , $left, $table, $table, $empty, $table, $right, $table);
-      if (array_key_exists($table, $tables_right)) printf ("<td>%s</td>\n", $table);
+      if (array_key_exists($table, $tables_right)) printf ("<td><div id='myDiv' class='btn-group btn-group-xs'><a id='pop' href-'#'' class='btn btn-sm' data-toggle='popover' data-content='Columns<br /><br />%s'><span class='glyphicon glyphicon-collapse-down'></span></a></div>%s</td>\n", $tables_right[$table], $table);
       else { echo "<td></td>"; }
       echo "<tr>";
     }

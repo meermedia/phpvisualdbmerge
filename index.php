@@ -185,15 +185,15 @@ $emptycache = (!empty($_REQUEST['emptycache'])) ? $_REQUEST['emptycache'] : '';
       else { echo "<td></td>"; }
       if (array_key_exists($table, $tables_left)) printf ("<td>%s</td>\n", $table);
       else { echo "<td></td>"; }
+        //<label class='btn btn-primary' data-toggle='popover' data-content='merge tables with left table as leading'><input type='radio' name='%s' id='fuseleft' value='fuseleft'><span class='glyphicon glyphicon-circle-arrow-right'><span class='glyphicon glyphicon-transfer'></span></label>
+        //<label class='btn btn-primary' data-toggle='popover' data-content='merge tables with right table as leading'><input type='radio' name='%s' id='fuseright' value='fuseright'><span class='glyphicon glyphicon-transfer'><span class='glyphicon glyphicon-circle-arrow-left'></span></label>
       printf ("<td><div id='action' class='btn-group btn-group-xs' data-toggle='buttons'>
         <label class='btn btn-primary %s' data-toggle='popover' data-content='use left table for export'><input type='radio' name='%s' id='left' value='left'><span class='glyphicon glyphicon-chevron-right'></span></label>
-        <label class='btn btn-primary' data-toggle='popover' data-content='merge tables with left table as leading'><input type='radio' name='%s' id='fuseleft' value='fuseleft'><span class='glyphicon glyphicon-circle-arrow-right'><span class='glyphicon glyphicon-transfer'></span></label>
         <label class='btn btn-primary remove' data-toggle='popover' data-content='exclude table from export'><input type='radio' name='%s' id='exclude' value='exclude'><span class='glyphicon glyphicon-remove'></span></label>
         <label class='btn btn-primary trash %s' data-toggle='popover' data-content='use empty table for export'><input type='radio' name='%s' id='empty' value='empty'><span class='glyphicon glyphicon-trash'></span></label>
-        <label class='btn btn-primary' data-toggle='popover' data-content='merge tables with right table as leading'><input type='radio' name='%s' id='fuseright' value='fuseright'><span class='glyphicon glyphicon-transfer'><span class='glyphicon glyphicon-circle-arrow-left'></span></label>
         <label class='btn btn-primary %s' data-toggle='popover' data-content='use right table for export'><input type='radio' name='%s' id='right' value='right'><span class='glyphicon glyphicon-chevron-left'></span></label>
         </div></td>\n"
-        , $left, $table, $table, $table, $empty, $table, $table, $right, $table);
+        , $left, $table, $table, $empty, $table, $right, $table);
       if (array_key_exists($table, $tables_right)) printf ("<td>%s</td>\n", $table);
       else { echo "<td></td>"; }
       echo "<tr>";

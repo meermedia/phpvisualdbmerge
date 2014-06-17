@@ -1,0 +1,11 @@
+phpMyDumper
+-----------
+Version: 1.10
+Copyright (c) 2009 by Micky Holdorf
+Holdorf.dk/Software - micky.holdorf@gmail.com
+GNU Public License http://opensource.org/licenses/gpl-license.php
+
+
+Introduction
+------------
+phpMyDumper is a php class, that can be used for exporting databases and tables from a MySQL server. This is useful if you want to do automatic backup of your databases using a cronjob and you do not have access to the mysqldump command.

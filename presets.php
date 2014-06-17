@@ -7,6 +7,7 @@ $drupalauto = array(
 	'uid',
 	'nid',
 	'eid',
+	'entity_id',
 	'gid',
 	'vid',
 	'tid',

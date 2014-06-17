@@ -1,0 +1,24 @@
+phpMyDumper
+-----------
+Version: 1.10
+Copyright (c) 2009 by Micky Holdorf
+Holdorf.dk/Software - micky.holdorf@gmail.com
+GNU Public License http://opensource.org/licenses/gpl-license.php
+
+
+Version History
+---------------
+1.10: (2009-10-28)
+Support for UTF-8 connections
+New option to dump AUTO_INCREMENT in table structure when used with older MySQL versions
+Reports progress information when creating sql file
+New example of how to use the stream feature
+Dumps MySQL server version
+
+1.00: (2009-03-13)
+Based on MySQLDump by Daniele Viganò, http://www.creativefactory.it
+Uses SHOW CREATE TABLES to get table structures
+Adds AUTO_INCREMENT in table structures
+Adds option to formats dump file like phpMyAdmin export
+Adds options to dump DROP TABLE and CREATE TABLE statements
+Adds options to dump data and expanded INSERT statements

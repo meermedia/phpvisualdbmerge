@@ -1,7 +1,21 @@
 <?php
-/**
- * Use a safe GLOBAL user with only 'SELECT' and 'SHOW TABLES' permissions!
+/*
+ * Use a read-only user (only read-access) for security reasons.
  */
 
-$db_left = new mysqli("localhost", "my_user", "my_password");
-$db_right = new mysqli("localhost", "my_user", "my_password");
+/*
+ * Left (development) database
+ */
+
+$db_left_host = 'localhost';
+$db_left_user = 'user';
+$db_left_pass = 'pass';
+
+/*
+ * Right (production) database
+ */
+
+$db_right_host = 'localhost';
+$db_right_user = 'user';
+$db_right_pass = 'pass';
+

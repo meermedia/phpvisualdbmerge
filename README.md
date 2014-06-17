@@ -20,12 +20,17 @@ DONE:
 - table comparison
 - presets for drupal 6/7/auto
 - warning for column mismatch
+- the actual export function
 
 TODO:
-- the actual export function
 - customisable presets
 
 INSTALLATION INSTRUTIONS:
 - copy the sample.config.php to a config.php
 - create (if not already available) read-only users for your MySQL databases: global 'read' privileges
 - fill in details for your users in the config.php
+- put folder behind .htaccess or other password restricted environment
+
+===============
+
+PHP Visual DB Merge uses a modified version of phpMyDumper (details see subdirectory). It was modified to work work OO mysqli instead of procedural mysql extensions, in order to make it PHP5.5 proof.

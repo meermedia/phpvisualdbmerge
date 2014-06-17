@@ -243,7 +243,7 @@ $emptycache = (!empty($_REQUEST['emptycache'])) ? $_REQUEST['emptycache'] : '';
                 return table;
             });
           $.ajax({
-              url: "/export.php",
+              url: "export.php",
               type: "POST",
               data: { 
                 tables: data,

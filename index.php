@@ -127,11 +127,17 @@ $emptycache = (!empty($_REQUEST['emptycache'])) ? $_REQUEST['emptycache'] : '';
               <tbody>
 <?php
 	if (!empty($_REQUEST['db_left']) && !empty($_REQUEST['db_right'])) {
+    /* draw up query */
+    $query_cols = "
+      SELECT c.TABLE_NAME,GROUP_CONCAT(c.COLUMN_NAME ORDER BY c.COLUMN_NAME SEPARATOR ',') FROM INFORMATION_SCHEMA.COLUMNS c
+        JOIN INFORMATION_SCHEMA.TABLES t ON (c.TABLE_NAME = t.TABLE_NAME AND t.TABLE_SCHEMA LIKE ? AND t.TABLE_TYPE = 'BASE TABLE')
+        WHERE c.TABLE_SCHEMA LIKE ? GROUP BY c.TABLE_NAME ORDER BY c.TABLE_NAME, c.COLUMN_NAME
+    ";
 		/* start with left db */
 		$db_left->select_db($_REQUEST['db_left']);
 		/* Select queries return a resultset */
-    $stmt = $db_left->prepare("SELECT TABLE_NAME,GROUP_CONCAT(COLUMN_NAME ORDER BY COLUMN_NAME SEPARATOR ',') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA LIKE ? GROUP BY TABLE_NAME ORDER BY TABLE_NAME, COLUMN_NAME");
-    $stmt->bind_param('s', $_REQUEST['db_left']);
+    $stmt = $db_left->prepare($query_cols);
+    $stmt->bind_param('ss', $_REQUEST['db_left'], $_REQUEST['db_left']);
     $stmt->execute();
     if ($result = $stmt->bind_result($col1,$col2)) {
         /* fetch array */
@@ -148,8 +154,8 @@ $emptycache = (!empty($_REQUEST['emptycache'])) ? $_REQUEST['emptycache'] : '';
 		/* now do right db */
 		$db_right->select_db($_REQUEST['db_right']);
 		/* Select queries return a resultset */
-    $stmt = $db_right->prepare("SELECT TABLE_NAME,GROUP_CONCAT(COLUMN_NAME ORDER BY COLUMN_NAME SEPARATOR ',') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA LIKE ? GROUP BY TABLE_NAME ORDER BY TABLE_NAME, COLUMN_NAME");
-    $stmt->bind_param('s', $_REQUEST['db_right']);
+    $stmt = $db_right->prepare($query_cols);
+    $stmt->bind_param('ss', $_REQUEST['db_right'], $_REQUEST['db_right']);
     $stmt->execute();
     if ($result = $stmt->bind_result($col1,$col2)) {
         /* fetch array */

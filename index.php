@@ -129,6 +129,7 @@ $emptycache = (!empty($_REQUEST['emptycache'])) ? $_REQUEST['emptycache'] : '';
 	if (!empty($_REQUEST['db_left']) && !empty($_REQUEST['db_right'])) {
     /* draw up query */
     $query_cols = "
+      SET SESSION group_concat_max_len = 1000000;
       SELECT c.TABLE_NAME,GROUP_CONCAT(c.COLUMN_NAME ORDER BY c.COLUMN_NAME SEPARATOR ',') FROM INFORMATION_SCHEMA.COLUMNS c
         JOIN INFORMATION_SCHEMA.TABLES t ON (c.TABLE_NAME = t.TABLE_NAME AND t.TABLE_SCHEMA LIKE ? AND t.TABLE_TYPE = 'BASE TABLE')
         WHERE c.TABLE_SCHEMA LIKE ? GROUP BY c.TABLE_NAME ORDER BY c.TABLE_NAME, c.COLUMN_NAME

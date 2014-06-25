@@ -75,6 +75,7 @@ $drupal7content = array(
 	'node_revision',
 	'og_membership',
 	'og_users_roles',
+	'realname',
 	'sessions',
 	'taxonomy(.*)',
 	'users',

@@ -65,6 +65,7 @@ $drupal6content = array(
 	'watchdog',
 );
 $drupal7content = array(
+	'entityform',
 	'flag_counts',
 	'flagging',
 	'field_collection(.*)',

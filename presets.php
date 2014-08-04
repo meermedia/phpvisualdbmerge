@@ -66,6 +66,8 @@ $drupal6content = array(
 );
 $drupal7content = array(
 	'entityform',
+	'feeds_item',
+	'feeds_log',
 	'flag_counts',
 	'flagging',
 	'field_collection(.*)',

@@ -55,6 +55,7 @@ $drupal6content = array(
 	'search_(.*)',
 	'serial_organisatie_field_id_organisation',
 	'sessions',
+	'signup(.*)',
 	'statspro(.*)',
 	'taxonomy_(.*)',
 	'term_(.*)',
